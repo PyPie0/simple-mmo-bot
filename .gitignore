@@ -1,0 +1,5 @@
+*.log
+logdata.json
+__pycache__/
+env/
+im-not-robot-prep/train-data

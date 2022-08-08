@@ -16,5 +16,5 @@
 	"gathering_page_url": "https://web.simple-mmo.com/crafting/material/gather/{}?new_page=true",
 	"gathering_url": "https://web.simple-mmo.com/api/crafting/material/gather/{}",
 	"battle_menu_url": "https://web.simple-mmo.com/battle/menu",
-	"generate_enemy_url": "https://api.simple-mmo.com/api/battlearena/generate",
+	"generate_enemy_url": "https://api.simple-mmo.com/api/battlearena/generate"
 }

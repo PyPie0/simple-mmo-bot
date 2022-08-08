@@ -204,22 +204,32 @@ class AttackNpcBot(BaseBot):
 		url = self.urls['attack_url'].format(npc_id)
 		resp = self.post(url, form_data)
 		return json.loads(resp.html.html)
+		
+
+	def get_player_hp(self):
+		player_info = self.get_player_info()
+		current_hp = int(player_info['current_hp'])
+		return current_hp	
 
 	
 	def run(self):
-		self.logger.info(f'FIGHT:Start')
+		self.logger.info(f'BATTLE:Start')
 		pattern = r"attack\/(.{0,})\?"
 		try:
 			npc_id = re.findall(pattern, self.step_response['text'])[0]
 		except KeyError:
 			npc_id = self.step_response['id']
 		self._to_attack_page(npc_id)
+		player_hp = self.get_player_hp()
 		while True:
+			if player_hp < self.min_player_hp:
+				self.logger.debug(f'BATTLE:Not completed')
+				break
 			attack_info = self._attack(npc_id)
 			if (attack_info['opponent_hp'] <= 0 and 
 						attack_info['type'] == 'success'):
-				self.logger.debug(f'FIGHT:Win')
-				self.logger.info(f'FIGHT-INFO:{attack_info}')
+				self.logger.debug(f'BATTLE:Win')
+				self.logger.info(f'BATTLE-INFO:{attack_info}')
 				break
 			if ((attack_info['type'] == 'error') or 
 						(attack_info['player_hp'] <= self.min_player_hp) or 
@@ -408,7 +418,7 @@ class BattleBot(BaseBot):
 		while count < enemy_amount:
 			energy_amount = self.get_energy_amount()
 			if not energy_amount:
-				self.logger.debug(f'QUEST:You have no more energy')
+				self.logger.debug(f'BATTLE:You have no more energy')
 				time.sleep(utils.random_delay(300))
 				continue
 			time.sleep(utils.random_delay(2))
@@ -428,10 +438,18 @@ class JobBot(BaseBot):
 		super().__init__(session, urls, logdata, logger)
 
 
-	def to_job_page(self, job_ref)
+	def to_job_page(self, job_ref):
 		resp = self.get(job_ref)
+		return resp
+
+	def start_working(self, start_working_url):
+		resp = self.post(start_working_url)
 		return resp
 
 
 	def run(self, job_ref, job_amount, *args):
+		start_working_url = "https://web.simple-mmo.com/api/job/perform/2/1"
 		self.to_job_page(job_ref)
+		for _ in range(job_amount):
+			self.start_working(start_working_url)
+			self.to_job_page(job_ref)

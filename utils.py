@@ -19,7 +19,6 @@ def from_pickle(item_path):
 
 
 def to_pickle(item, filename):
-    filename = f'{filename}.pickle'
     with open(filename, 'wb') as f:
         pickle.dump(item, f)
     print(f'{filename} was saved')

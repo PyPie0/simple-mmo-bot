@@ -53,13 +53,14 @@ class BaseBot:
 				'accept-language': 'ru,en;q=0.9,en-GB;q=0.8,en-US;q=0.7',
 			}
 		self.not_robot_model = keras.models.load_model('model.h5')
-		self.class_names = ['Banana', 'Book', 'Bread', 'Candy_Cane', 'Candy_Corn', 'Cannon', 
-			   'Carrot', 'Cheese', 'Cherry', 'Chest_Piece', 'Clock', 'Crown', 
-			   'Diamond', 'Egg', 'Empty_Bottle', 'Fire', 'Fish', 'Frog', 'Ghost', 
-			   'Grapes', 'Gun', 'Hat', 'Helmet', 'House', 'Key', 'Lemon', 'Mushroom',
-			   'Necklace', 'Orange', 'Pear', 'Pepper', 'Pie', 'Piece_of_Meat', 'Pineapple', 
-			   'Pretzel', 'Pumpkin', 'Rose', 'Strawberry', 'Watermelon'
-			   ]
+		self.class_names = [
+			'Banana', 'Book', 'Bread', 'Candy_Cane', 'Candy_Corn', 'Cannon', 
+			'Carrot', 'Cheese', 'Cherry', 'Chest_Piece', 'Clock', 'Crown', 
+			'Diamond', 'Egg', 'Empty_Bottle', 'Fire', 'Fish', 'Frog', 'Ghost', 
+			'Grapes', 'Gun', 'Hat', 'Helmet', 'House', 'Key', 'Lemon', 'Mushroom',
+			'Necklace', 'Orange', 'Pear', 'Pepper', 'Pie', 'Piece_of_Meat', 'Pineapple', 
+			'Pretzel', 'Pumpkin', 'Rose', 'Strawberry', 'Watermelon'
+		]
 
 	
 	def get(self, url, headers=None, render=False):
@@ -147,10 +148,14 @@ class BaseBot:
 		names = []
 		for img in img_list:
 			names.append(
-				self.class_names[np.argmax(
-					self.not_robot_model.predict(
-						np.array([img])))].replace('_', ' ')
-				)
+				self.class_names[
+					np.argmax(
+						self.not_robot_model.predict(
+							np.array([img])
+						)
+					)
+				].replace('_', ' ')
+			)
 		try:
 			index = names.index(correct_value.strip()) 
 		except ValueError:
@@ -320,15 +325,16 @@ class TravelBot(BaseBot):
 			action = step_response.get('step_type', 'default')
 			match action:
 				case 'npc':
-					attack_bot = AttackNpcBot(self.session, self.urls, self.logdata, 
-											self.logger, self._token, self.api_token, 
-											step_response)
+					attack_bot = AttackNpcBot(
+						self.session, self.urls, self.logdata, 
+						self.logger, self._token, self.api_token, step_response
+					)
 					attack_bot.run()
 					self.to_travel_page()
 				case 'material':
-					gathering_bot = GatheringMaterialBot(self.session, self.urls, self.logdata, 
-											self.logger, self._token, self.api_token, 
-											step_response)
+					gathering_bot = GatheringMaterialBot(
+						self.session, self.urls, self.logdata, 
+						self.logger, self._token, self.api_token, step_response)
 					gathering_bot.run()
 					self.to_travel_page()
 			time.sleep(utils.random_delay(next_wait/1000 + 1))
@@ -424,32 +430,11 @@ class BattleBot(BaseBot):
 			time.sleep(utils.random_delay(2))
 			enemy_info = self.generate_enemy()
 			self.logger.info(f'BATTLE:{enemy_info} was generated')
-			attack_bot = AttackNpcBot(self.session, self.urls, self.logdata, 
-									self.logger, self._token, self.api_token, 
-									enemy_info)
+			attack_bot = AttackNpcBot(
+				self.session, self.urls, self.logdata, 
+				self.logger, self._token, self.api_token, 
+				enemy_info
+			)
 			attack_bot.run()
 			count += 1
 			self.to_battle_menu_page()
-
-
-class JobBot(BaseBot):
-	
-	def __init__(self, session, urls, logdata, logger):
-		super().__init__(session, urls, logdata, logger)
-
-
-	def to_job_page(self, job_ref):
-		resp = self.get(job_ref)
-		return resp
-
-	def start_working(self, start_working_url):
-		resp = self.post(start_working_url)
-		return resp
-
-
-	def run(self, job_ref, job_amount, *args):
-		start_working_url = "https://web.simple-mmo.com/api/job/perform/2/1"
-		self.to_job_page(job_ref)
-		for _ in range(job_amount):
-			self.start_working(start_working_url)
-			self.to_job_page(job_ref)

@@ -1,5 +1,5 @@
 # simple-mmo-bot
-<h3>Bot for automating routine in simple-mmo-bot</h3>
+<h3>Bot for automating routine in simple mmo game</h3>
 
 Usage Tips
 
